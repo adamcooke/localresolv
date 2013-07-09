@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+require 'rubydns'
+
+PORT    = 27891
+LISTEN  = '0.0.0.0'
+
+if ARGV.empty?
+  puts "usage: localresolv [domains]"
+  exit 1
+else
+  puts "\e[32mListening on: #{ARGV.join(', ')}\e[0m"
+end
+
+RubyDNS::run_server(:listen => [[:udp, LISTEN, PORT], [:tcp, LISTEN, PORT]]) do
+  ARGV.each do |domain|
+    match(/#{domain}\z/, Resolv::DNS::Resource::IN::A) do |transaction|
+      transaction.respond!("127.0.0.1")
+    end
+  end
+end
